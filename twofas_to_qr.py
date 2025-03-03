@@ -1,5 +1,13 @@
+#!/usr/bin/env -S uv run
+# /// script
+# dependencies = [
+#     "pathvalidate",
+#     "pillow",
+#     "qrcode",
+# ]
+# ///
+
 """Module that converts 2fas backup files to QR codes"""
-#!/usr/bin/env python3
 
 import json
 import os
@@ -16,12 +24,12 @@ class AuthCode:
         self.name = twofas_service["name"]
         self.secret = twofas_service["secret"]
         self.token_type = twofas_service["otp"]["tokenType"]
-        self.label = twofas_service["otp"]["label"]
         if self.token_type != "TOTP":
             raise ValueError(
                 f"Unsupported token type {self.token_type} for account {self.name}"
             )
         self.account = twofas_service["otp"].get("account", self.name)
+        self.label = twofas_service["otp"].get("label") or f"{self.account}@{self.name}"
         self.otpauth = (
             f"otpauth://totp/{self.account}?secret={self.secret}&issuer={self.name}"
         )
